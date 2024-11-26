@@ -122,7 +122,7 @@ exports.searchProducts = async (req, res) => {
       .populate('category_id', 'name'); // Lấy thông tin category
 
     if (!products.length) {
-      return res.status(404).json({ message: 'Không tìm thấy sản phẩm phù hợp' });
+      return res.status(200).json([]);
     }
 
     res.status(200).json(products);
