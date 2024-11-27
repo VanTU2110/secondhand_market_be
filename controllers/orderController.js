@@ -26,7 +26,7 @@ exports.createOrder = async (req, res) => {
 
     // Giảm số lượng sản phẩm
     for (const item of cart) {
-      console.log('DEBUG 1: ITEM', item)
+      console.log('DEBUG 0: ITEM', item)
 
       const product = await Product.findById(item._id);
       console.log('DEBUG 1: ', product)
@@ -49,14 +49,13 @@ exports.createOrder = async (req, res) => {
       )
     }
 
-     // Tạo đơn hàng mới
      const order = new Order({
       buyer_id,
       shop_id,
       cart: newProductItem,
       total_price: totalPrice,
-      status: 'pending', // Đơn hàng chưa xử lý
-      payment_status: 'pending' // Chưa thanh toán do là COD
+      status: 'pending', 
+      payment_status: 'pending'
     });
     console.log('COME HERE 3')
 

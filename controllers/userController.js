@@ -1,12 +1,30 @@
+// backend/controllers/userController.js
+
 const User = require('../Models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { isValidEmail, isValidPassword, isValidPhone } = require('../utils/utils'); // Đảm bảo đường dẫn đúng
 
 // Đăng ký tài khoản
 exports.registerUser = async (req, res) => {
   const { email, password, username, phone, address, role } = req.body;
 
   try {
+    // Kiểm tra tính hợp lệ của email
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: 'Email không hợp lệ' });
+    }
+
+    // Kiểm tra tính hợp lệ của mật khẩu
+    if (!isValidPassword(password)) {
+      return res.status(400).json({ message: 'Mật khẩu không hợp lệ' });
+    }
+
+    // Kiểm tra tính hợp lệ của số điện thoại
+    if (phone && !isValidPhone(phone)) {
+      return res.status(400).json({ message: 'Số điện thoại không hợp lệ' });
+    }
+
     // Kiểm tra xem email đã tồn tại chưa
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -39,6 +57,11 @@ exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Kiểm tra tính hợp lệ của email
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: 'Email không hợp lệ' });
+    }
+
     // Tìm người dùng theo email
     const user = await User.findOne({ email });
     if (!user) {
