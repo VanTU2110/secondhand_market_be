@@ -10,22 +10,18 @@ exports.registerUser = async (req, res) => {
   const { email, password, username, phone, address, role } = req.body;
 
   try {
-    // Kiểm tra tính hợp lệ của email
+ 
     if (!isValidEmail(email)) {
       return res.status(400).json({ message: 'Email không hợp lệ' });
     }
 
-    // Kiểm tra tính hợp lệ của mật khẩu
     if (!isValidPassword(password)) {
       return res.status(400).json({ message: 'Mật khẩu không hợp lệ' });
     }
-
     // Kiểm tra tính hợp lệ của số điện thoại
     if (phone && !isValidPhone(phone)) {
       return res.status(400).json({ message: 'Số điện thoại không hợp lệ' });
     }
-
-    // Kiểm tra xem email đã tồn tại chưa
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'Email đã tồn tại' });
@@ -74,7 +70,6 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
     }
 
-    // Tạo token
     const token = jwt.sign({ id: user._id, role: user.role }, 'SECRET_KEY', { expiresIn: '1h' });
 
     res.status(200).json({ token, message: 'Đăng nhập thành công' });
