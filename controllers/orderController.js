@@ -30,6 +30,15 @@ exports.createOrder = async (req, res) => {
 
       const product = await Product.findById(item._id);
       console.log('DEBUG 1: ', product)
+      if (!product) {
+        return res.status(404).json({ message: `Product with ID ${item._id} not found.` });
+      }
+    
+      if (product.quantity < item.quantity) {
+        return res.status(400).json({
+          message: `Không đủ số lượng cho sản phẩm ${product.title}. Trong kho còn: ${product.quantity},Số lượng bạn đặt: ${item.quantity}`
+        });
+      }
       // if (!product || product.quantity < item.quantity) {
       //   return res.status(400).json({ message: 'Product not available or insufficient quantity' });
       // }

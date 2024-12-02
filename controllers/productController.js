@@ -94,6 +94,7 @@ exports.updateProductById = async (req, res) => {
 // Tìm kiếm sản phẩm theo tên và giá
 exports.searchProducts = async (req, res) => {
   const { title, minPrice, maxPrice } = req.query; // Nhận các tham số từ query
+  
 
   try {
     // Tạo điều kiện tìm kiếm rỗng, sẽ thêm các điều kiện dựa trên query

@@ -25,6 +25,7 @@ const categoryRoutes = require('./routes/category');
 const reviewRoutes = require('./routes/review');
 const messageRoutes = require('./routes/message');
 const routerImages  = require('./routes/upload');
+const auth = require('./routes/auth');
 
 
 app.use('/api/users', userRoutes);
@@ -35,5 +36,6 @@ app.use('/api/categories',categoryRoutes);
 app.use('/api/reviews',reviewRoutes);
 app.use('/api/messages',messageRoutes);
 app.use('/api/images',routerImages);
+app.use('/api/auth',auth);
 
 module.exports = app;
