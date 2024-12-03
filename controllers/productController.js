@@ -34,7 +34,7 @@ exports.getProductsByCategory = async (req, res) => {
 
   try {
     const products = await Product.find({ category_id: categoryId })
-      .populate('shop_id', 'name') // Lấy thông tin của shop
+    .populate('shop_id', 'shop_name') // Lấy thông tin của shop
       .populate('category_id', 'name'); // Lấy thông tin của category
     if (!products.length) {
       return res.status(404).json({ message: 'Không có sản phẩm nào thuộc loại này' });

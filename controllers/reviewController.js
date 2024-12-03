@@ -1,6 +1,6 @@
 const Review = require('../Models/Review');
 const Order = require('../Models/Order');
-// Tạo mới bình luận
+
 exports.createReview = async (req, res) => {
   const { user_id, product_id, rating, review } = req.body;
 
@@ -9,18 +9,24 @@ exports.createReview = async (req, res) => {
   }
 
   try {
-    // Kiểm tra nếu người dùng đã mua sản phẩm trước khi đánh giá
-    const hasPurchased = await Order.findOne({
-      user_id,
-      product_id,
-      status: 'paid' // Chỉ cho phép đánh giá nếu đơn hàng đã được thanh toán
-    });
+    // Tìm đơn hàng đã thanh toán với buyer_id và product_id trong cart
+    // const hasPurchased = await Order.findOne({
+    //   buyer_id: user_id, // Tìm theo buyer_id
+    //   cart: {
+    //     $elemMatch: { product_id: product_id }  // Kiểm tra nếu product_id nằm trong mảng cart
+    //   },
+    //   status: 'paid' 
+    // });
+    // console.log(user_id);
+    // console.log(product_id);
 
-    if (!hasPurchased) {
-      return res.status(403).json({ message: 'Bạn cần mua sản phẩm này trước khi đánh giá.' });
-    }
+    
+    
 
-    // Tạo đánh giá mới
+    // // if (!hasPurchased) {
+    // //   return res.status(403).json({ message: 'Bạn cần nhận hàng trước khi đánh giá.' });
+    // // }
+
     const newReview = new Review({
       user_id,
       product_id,
@@ -29,11 +35,21 @@ exports.createReview = async (req, res) => {
     });
 
     await newReview.save();
-    res.status(201).json({ message: 'Đánh giá đã được thêm thành công.', review: newReview });
+
+    // Cập nhật trạng thái 'reviewed' của đơn hàng
+    await Order.updateOne(
+      { buyer_id: user_id, cart: { $elemMatch: { product_id: product_id } }, status: 'paid' },
+      { $set: { reviewed: true } }
+    );
+
+    res.status(201).json({ message: 'Đánh giá thành công.', review: newReview });
   } catch (error) {
-    res.status(500).json({ message: 'Đã xảy ra lỗi khi thêm đánh giá.' });
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi hệ thống' });
   }
 };
+
+
 
 // Lấy tất cả bình luận cho một sản phẩm
 exports.getReviewsByProduct = async (req, res) => {
