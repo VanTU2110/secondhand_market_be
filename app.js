@@ -25,6 +25,7 @@ const categoryRoutes = require('./routes/category');
 const reviewRoutes = require('./routes/review');
 const messageRoutes = require('./routes/message');
 const routerImages  = require('./routes/upload');
+const conversationRoutes = require('./routes/conversation');
 const auth = require('./routes/auth');
 
 
@@ -35,7 +36,12 @@ app.use('/api/shop',shopRoutes);
 app.use('/api/categories',categoryRoutes);
 app.use('/api/reviews',reviewRoutes);
 app.use('/api/messages',messageRoutes);
+app.use('/api/conversations',conversationRoutes);
 app.use('/api/images',routerImages);
 app.use('/api/auth',auth);
+
+app.get("/", (req, res) => {
+  res.send("Backend đã sẵn sàng rồi đó, test đi");
+});
 
 module.exports = app;

@@ -1,10 +1,11 @@
-// routes/messageRoutes.js
 const express = require('express');
+const { sendMessage, getMessages } = require('../controllers/messageController');
 const router = express.Router();
-const messageController = require('../controllers/messageController');
 
-router.post('/send', messageController.sendMessage);
+// Route gửi tin nhắn
+router.post('/sendMessage', sendMessage);
 
-router.get('/user/:userId', messageController.getMessages);
+// Route lấy tin nhắn giữa hai người
+router.get('/getMessage', getMessages);
 
 module.exports = router;

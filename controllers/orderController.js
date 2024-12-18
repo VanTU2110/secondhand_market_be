@@ -39,9 +39,7 @@ exports.createOrder = async (req, res) => {
           message: `Không đủ số lượng cho sản phẩm ${product.title}. Trong kho còn: ${product.quantity},Số lượng bạn đặt: ${item.quantity}`
         });
       }
-      // if (!product || product.quantity < item.quantity) {
-      //   return res.status(400).json({ message: 'Product not available or insufficient quantity' });
-      // }
+
 
       await Product.findByIdAndUpdate(item._id, {
         $inc: { quantity: -item.quantity }
@@ -165,3 +163,129 @@ exports.getOrderById = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+exports.getShopRevenue = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+    const { startDate, endDate } = req.query; // Tham số query (format: YYYY-MM-DD)
+
+    const matchCondition = { 
+      shop_id: shopId,
+      status: 'paid',
+      ...(startDate && endDate && {
+        order_date: { $gte: new Date(startDate), $lte: new Date(endDate) }
+      })
+    };
+
+    const totalRevenue = await Order.aggregate([
+      { $match: matchCondition },
+      { $group: { _id: null, total: { $sum: "$total_price" } } }
+    ]);
+
+    res.json({ totalRevenue: totalRevenue[0]?.total || 0 });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+exports.getOrderStatusStats = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+
+    const orderStatusStats = await Order.aggregate([
+      { $match: { shop_id: (shopId) } },
+      { $group: { _id: "$status", count: { $sum: 1 } } }
+    ]);
+    console.log("Order Status Stats:", orderStatusStats);
+    
+    res.json(orderStatusStats);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+
+exports.getTopProducts = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+
+    const topProducts = await Order.aggregate([
+      { $match: { shop_id: shopId } },
+      { $unwind: "$cart" },
+      { 
+        $group: { 
+          _id: "$cart.product_id",
+          title: { $first: "$cart.title" },
+          totalQuantity: { $sum: "$cart.quantity" },
+          totalRevenue: { $sum: { $multiply: ["$cart.price", "$cart.quantity"] } }
+        }
+      },
+      { $sort: { totalQuantity: -1 } },
+      { $limit: 10 } // Lấy top 10 sản phẩm
+    ]);
+    console.log("Top product",topProducts);
+    
+
+    res.json(topProducts);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+exports.getOrderTimeline = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+    const { startDate, endDate, interval = 'day' } = req.query;
+    console.log("req.params:", req.params);
+    console.log("req.query:", req.query);
+
+
+    const timeUnit = interval === 'month' ? 
+      { $dateToString: { format: "%Y-%m", date: "$order_date" } } :
+      { $dateToString: { format: "%Y-%m-%d", date: "$order_date" } };
+
+    const matchCondition = {
+      shop_id: shopId,
+      ...(startDate && endDate && {
+        order_date: { $gte: new Date(startDate), $lte: new Date(endDate) }
+      })
+    };
+
+    const orderTimeline = await Order.aggregate([
+      { $match: matchCondition },
+      { $group: { _id: timeUnit, totalOrders: { $sum: 1 } } },
+      { $sort: { _id: 1 } }
+    ]);
+    console.log("Ordertimeline", orderTimeline);
+    
+
+    res.json(orderTimeline);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+exports.getReviewedRatio = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+
+    const reviewedStats = await Order.aggregate([
+      { $match: { shop_id: (shopId) } },
+      { $group: { _id: "$reviewed", count: { $sum: 1 } } }
+    ]);
+
+    const reviewedCount = reviewedStats.find(stat => stat._id === true)?.count || 0;
+    const totalCount = reviewedStats.reduce((acc, stat) => acc + stat.count, 0);
+
+    res.json({ 
+      reviewedCount, 
+      totalCount, 
+      reviewedRatio: totalCount ? (reviewedCount / totalCount) * 100 : 0 
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+

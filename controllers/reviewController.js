@@ -9,31 +9,27 @@ exports.createReview = async (req, res) => {
   }
 
   try {
-    // Tìm đơn hàng đã thanh toán với buyer_id và product_id trong cart
-    // const hasPurchased = await Order.findOne({
-    //   buyer_id: user_id, // Tìm theo buyer_id
-    //   cart: {
-    //     $elemMatch: { product_id: product_id }  // Kiểm tra nếu product_id nằm trong mảng cart
-    //   },
-    //   status: 'paid' 
-    // });
-    // console.log(user_id);
-    // console.log(product_id);
+
+    const hasPurchased = await Order.findOne({
+      buyer_id: user_id, // Tìm theo buyer_id
+      cart: {
+        $elemMatch: { product_id: product_id }  // Kiểm tra nếu product_id nằm trong mảng cart
+      },
+      status: 'paid' 
+    });
+    console.log(user_id);
+    console.log(product_id);
 
     
-    
-
-    // // if (!hasPurchased) {
-    // //   return res.status(403).json({ message: 'Bạn cần nhận hàng trước khi đánh giá.' });
-    // // }
-
+    if (!hasPurchased) {
+      return res.status(403).json({ message: 'Bạn cần nhận hàng trước khi đánh giá.' });
+    }
     const newReview = new Review({
       user_id,
       product_id,
       rating,
       review
     });
-
     await newReview.save();
 
     // Cập nhật trạng thái 'reviewed' của đơn hàng

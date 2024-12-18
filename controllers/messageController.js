@@ -1,25 +1,33 @@
-// controllers/messageController.js
 const Message = require('../Models/Message');
 
+// Gửi tin nhắn
 exports.sendMessage = async (req, res) => {
+  const { senderId, receiverId, message } = req.body;
+
   try {
-    const { sender_id, receiver_id, content } = req.body;
-    const message = new Message({ sender_id, receiver_id, content });
-    await message.save();
-    res.status(201).json(message);
+    const newMessage = new Message({ senderId, receiverId, message });
+    await newMessage.save();
+    global.io.to(receiverId).emit('new-message', newMessage);
+    res.status(201).json(newMessage);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Lỗi khi gửi tin nhắn' });
   }
 };
 
+// Lấy tin nhắn giữa hai người
 exports.getMessages = async (req, res) => {
+  const { userId, conversationWith } = req.query;
+
   try {
-    const { userId } = req.params;
     const messages = await Message.find({
-      $or: [{ sender_id: userId }, { receiver_id: userId }]
-    }).populate('sender_id receiver_id', 'name email');
+      $or: [
+        { senderId: userId, receiverId: conversationWith },
+        { senderId: conversationWith, receiverId: userId },
+      ],
+    }).sort({ createdAt: 1 });
+
     res.status(200).json(messages);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Lỗi khi lấy tin nhắn' });
   }
 };

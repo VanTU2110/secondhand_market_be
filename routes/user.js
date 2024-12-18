@@ -10,4 +10,7 @@ router.get('/profile', authMiddleware, userController.getUserProfile);
 // Cập nhật role từ buyer sang seller
 router.put('/upgrade-to-seller/:id', userController.upgradeToSeller);
 
+// Cập nhật thông tin người dùng
+router.put('/update/update-infor-user/:id', authMiddleware, userController.updateUser);
+
 module.exports = router;

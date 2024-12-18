@@ -71,12 +71,12 @@ exports.createProduct = async (req, res) => {
 // Sửa thông tin sản phẩm theo ID
 exports.updateProductById = async (req, res) => {
   const { id } = req.params;
-  const { title, description, img_url, price, quantity, condition } = req.body;
+  const { category_id,title, description, img_url, price, quantity, condition } = req.body;
 
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { title, description, img_url, price, quantity, condition },
+      { category_id,title, description, img_url, price, quantity, condition },
       { new: true, runValidators: true }
     )
     .populate('category_id', 'name'); // Lấy thông tin của category

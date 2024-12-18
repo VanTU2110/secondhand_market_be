@@ -15,4 +15,15 @@ router.get('/buyer/:buyerId', orderController.getOrdersByBuyer);
 router.get('/shop/:shopId', orderController.getOrdersByShop);
 
 router.get('/getOrderbyID/:orderId', orderController.getOrderById);
+
+router.get('/revenue/:shopId', orderController.getShopRevenue);
+
+router.get('/order-status/:shopId', orderController.getOrderStatusStats);
+
+router.get('/top-products/:shopId', orderController.getTopProducts);
+
+router.get('/order-timeline/:shopId', orderController.getOrderTimeline);
+
+router.get('/reviewed-ratio/:shopId', orderController.getReviewedRatio);
+
 module.exports = router;
